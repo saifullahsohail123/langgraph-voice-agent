@@ -7,7 +7,7 @@ from langgraph.checkpoint.memory import InMemorySaver
 from state import AgentState
 
 class Agent:
-    def __init__(self, tools, name="Luna", model="llama3"):
+    def __init__(self, tools, name="Luna", model="llama3.1"):
         self.system_prompt = "You are Luna, the company's expense manager..."
         self.tools = tools
         # self.llm = ChatGoogleGenerativeAI(model=model).bind_tools(tools=self.tools)

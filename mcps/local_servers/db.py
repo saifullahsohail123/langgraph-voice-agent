@@ -7,7 +7,7 @@ from uuid import UUID, uuid4
 from datetime import datetime
 import os
 from pydantic import BaseModel
-from enum import StrEnum
+from enum import Enum
 import pandas as pd
 
 load_dotenv()
@@ -57,7 +57,7 @@ class Customer(BaseModel):
     last_name: str
     email: str
 
-class ExpenseCategory(StrEnum):
+class ExpenseCategory(str, Enum):
     MEALS = "meals"
     TRAVEL = "travel"
     LODGING = "lodging"

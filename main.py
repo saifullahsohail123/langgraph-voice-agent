@@ -28,19 +28,18 @@ async def main():
     print("Initializing MultiServerMCPClient...")
     client = MultiServerMCPClient(connections=mcp_config["mcpServers"])
     
-    async with client:
-        tools = await client.get_tools()
-        print(f"Loaded {len(tools)} tools from MCP.")
+    tools = await client.get_tools()
+    print(f"Loaded {len(tools)} tools from MCP.")
 
-        agent_graph = Agent(tools=tools).graph
+    agent_graph = Agent(tools=tools).graph
 
         # Initial turn
-        initial_input = AgentState(
+    initial_input = AgentState(
             messages=[HumanMessage(content="Briefly introduce yourself and ask how you can help today.")],
             customer_id=customer_id
         )
 
-        while True:
+    while True:
             print("\n ---- Assistant ---- \n")
             await stream_graph_response(initial_input, agent_graph, config)
             

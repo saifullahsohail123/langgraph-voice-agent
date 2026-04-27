@@ -1,4 +1,7 @@
-import sounddevice as sd
+try:
+    import sounddevice as sd
+except OSError:
+    sd = None
 import numpy as np
 import asyncio
 import io
@@ -23,9 +26,12 @@ async def record_audio_until_stop():
 
     loop = asyncio.get_running_loop()
     
-    # Start the input stream
-    with sd.InputStream(samplerate=sample_rate, channels=1, callback=callback):
-        await loop.run_in_executor(None, stop_recording)
+    if sd is None:
+        print("⚠️ PortAudio not found. Native recording disabled.")
+    else:
+        # Start the input stream
+        with sd.InputStream(samplerate=sample_rate, channels=1, callback=callback):
+            await loop.run_in_executor(None, stop_recording)
 
     if not audio_data:
         return ""
