@@ -50,8 +50,8 @@ async def record_audio_until_stop():
     with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as tmp_wav:
         write(tmp_wav.name, sample_rate, (audio_np * 32768).astype(np.int16))
         
-        print("Transcribing...")
-        result = stt_model.transcribe(tmp_wav.name)
+        print("Transcribing (English)...")
+        result = stt_model.transcribe(tmp_wav.name, language="en")
         text = result["text"].strip()
         
         os.unlink(tmp_wav.name)
