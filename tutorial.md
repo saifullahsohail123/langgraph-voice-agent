@@ -29,7 +29,7 @@ First, let's create a new standard python environment in your repository root (`
 name = "langgraph-voice-agent"
 version = "0.1.0"
 description = "Voice enabled langgraph agent."
-requires-python = ">=3.13"
+requires-python = ">=3.10"
 dependencies = [
     "langchain-mcp-adapters>=0.1.1",
     "langchain-openai>=0.3.17",
@@ -49,9 +49,19 @@ dependencies = [
 
 Create a `.env` file in the root with:
 ```env
-GOOGLE_API_KEY=your_google_api_key
-SUPABASE_URI=postgresql://postgres:password@db.example.supabase.co:5432/postgres
+OPENAI_API_KEY=your_openai_api_key
+SUPABASE_URI=postgresql://postgres:[YOUR-PASSWORD]@db.xxxxxx.supabase.co:5432/postgres
 ```
+
+### 💡 How to get your `SUPABASE_URI`
+1. **Login** to your [Supabase Dashboard](https://supabase.com/dashboard).
+2. **Select your project** (or create a new one).
+3. Click on the **Settings** (gear icon) in the bottom-left sidebar.
+4. Go to the **Database** tab.
+5. Scroll down to the **Connection string** section.
+6. Select the **URI** tab.
+7. **Copy the URI**. It will look something like: `postgresql://postgres:[YOUR-PASSWORD]@db.vnoqyv...supabase.co:5432/postgres`.
+8. **Important**: Replace `[YOUR-PASSWORD]` with the password you set when creating the project.
 
 ---
 

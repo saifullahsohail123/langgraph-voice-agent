@@ -1,0 +1,19 @@
+[project]
+name = "langgraph-voice-agent"
+version = "0.1.0"
+description = "Voice enabled langgraph agent."
+requires-python = ">=3.10"
+dependencies = [
+    "langchain-mcp-adapters>=0.1.1",
+    "langchain-openai>=0.3.17",
+    "langchain-google-genai>=2.0.0",
+    "langgraph>=0.4.5",
+    "mcp>=1.9.0",
+    "pandas>=2.2.3",
+    "psycopg2-binary>=2.9.10",
+    "pydantic>=2.11.4",
+    "python-dotenv>=1.1.0",
+    "scipy>=1.15.3",
+    "sounddevice>=0.5.2",
+    "sqlalchemy>=2.0.41",
+]

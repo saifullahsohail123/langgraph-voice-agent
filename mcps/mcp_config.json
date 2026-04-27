@@ -1,0 +1,10 @@
+{
+    "mcpServers": {
+        "db": {
+            "command": "python",
+            "args": [
+                "./mcps/local_servers/db.py"
+            ]
+        }
+    }
+}
