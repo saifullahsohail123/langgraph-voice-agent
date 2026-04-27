@@ -33,7 +33,7 @@ async def record_audio_until_stop():
         with sd.InputStream(samplerate=sample_rate, channels=1, callback=callback):
             await loop.run_in_executor(None, stop_recording)
 
-    if not audio_data:
+    if not audio_data and sd is not None:
         return ""
 
     audio_np = np.concatenate(audio_data, axis=0)
