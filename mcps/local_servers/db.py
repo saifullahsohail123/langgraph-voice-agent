@@ -123,7 +123,41 @@ async def list_expenses(customer_id: UUID) -> str:
     with SessionLocal() as session:
         expenses = session.query(DBExpense).filter(DBExpense.customer_id == customer_id).all()
         expenses_list = [Expense.model_validate(e.__dict__).model_dump_json(indent=2) for e in expenses]
-    return f"[{', '.join(expenses_list)}]"
+    return f"✅ Expense listed: {len(expenses)} itemsfound."
+
+@mcp.tool()
+async def update_expense(
+    expense_id: UUID,
+    name: Optional[str] = None,
+    amount: Optional[float] = None,
+    category: Optional[ExpenseCategory] = None,
+    description: Optional[str] = None,
+) -> str:
+    """Update an existing expense."""
+    with SessionLocal() as session:
+        expense = session.query(DBExpense).filter(DBExpense.id == expense_id).first()
+        if not expense:
+            return f"❌ Expense with ID {expense_id} not found."
+            
+        if name is not None: expense.name = name
+        if amount is not None: expense.amount = amount
+        if category is not None: expense.category = category.value
+        if description is not None: expense.description = description
+        
+        session.commit()
+    return f"✅ Expense updated successfully."
+
+@mcp.tool()
+async def delete_expense(expense_id: UUID) -> str:
+    """Delete an expense by its ID."""
+    with SessionLocal() as session:
+        expense = session.query(DBExpense).filter(DBExpense.id == expense_id).first()
+        if not expense:
+            return f"❌ Expense with ID {expense_id} not found."
+        
+        session.delete(expense)
+        session.commit()
+    return f"✅ Expense deleted successfully."
 
 if __name__ == "__main__":
     mcp.run(transport="stdio")

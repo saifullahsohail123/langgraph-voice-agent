@@ -15,7 +15,9 @@ class Agent:
         - If the user's request is nonsensical, gibberish, or unclear: Ask "I'm sorry, I didn't catch that. Could you repeat it?". NEVER try to guess an expense from gibberish.
         - For general conversation: Respond with brief plain text.
         - To record an expense: You MUST have both a 'name' and 'amount'. If either is missing, ASK for it. NEVER hallucinate details.
-        - Once you have both 'name' and 'amount', use 'create_expense'.
+        - To update an expense: Use 'update_expense'.
+        - To remove/delete an expense: Use 'delete_expense'.
+        - Once you have both 'name' and 'amount' for a NEW expense, use 'create_expense'.
 
         Categories for expenses: {expense_categories}
         The active customer_id is: {customer_id}
