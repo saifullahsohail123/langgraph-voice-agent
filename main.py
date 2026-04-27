@@ -1,6 +1,7 @@
 import json
 import asyncio
-from langchain_core.messages import HumanMessage, AIMessage
+import logging
+from langchain_core.messages import HumanMessage, AIMessage, AIMessageChunk
 from langchain_mcp_adapters.client import MultiServerMCPClient
 from state import AgentState
 from voice_utils import record_audio_until_stop, play_audio
@@ -9,41 +10,62 @@ from assistant_graph import Agent
 with open("mcps/mcp_config.json") as f:
     mcp_config = json.load(f)
 
+async def stream_graph_response(input_state: AgentState, agent_graph, config: dict):
+    """Stream the response from the graph."""
+    async for chunk, metadata in agent_graph.astream(
+        input=input_state, 
+        stream_mode="messages", 
+        config=config
+    ):
+        if isinstance(chunk, AIMessageChunk):
+            print(chunk.content, end="", flush=True)
+
 async def main():
     config = {"configurable": {"thread_id": "thread-1"}}
-    customer_id = "your-sample-uuid"
+    # Example customer ID (you can change this to a real one from your DB)
+    customer_id = "6e1a6130-5be4-4778-92a9-b86dc5f16750"
 
-    # 1. Fetch MCP tools
+    print("Initializing MultiServerMCPClient...")
     client = MultiServerMCPClient(connections=mcp_config["mcpServers"])
-    tools = await client.get_tools()
+    
+    async with client:
+        tools = await client.get_tools()
+        print(f"Loaded {len(tools)} tools from MCP.")
 
-    # 2. Initalize agent with those tools
-    agent_graph = Agent(tools=tools).build_graph()
+        agent_graph = Agent(tools=tools).graph
 
-    # 3. Initial input
-    initial_input = AgentState(
-        messages=[HumanMessage(content="Introduce yourself.")],
-        customer_id=customer_id
-    )
+        # Initial turn
+        initial_input = AgentState(
+            messages=[HumanMessage(content="Briefly introduce yourself and ask how you can help today.")],
+            customer_id=customer_id
+        )
 
-    transcribed_text = ""
-    while True:
-        # LangGraph chunk streaming logic 
-        async for chunk, metadata in agent_graph.astream(initial_input, stream_mode="messages", config=config):
-            # Print response progressively ...
-            pass
+        while True:
+            print("\n ---- Assistant ---- \n")
+            await stream_graph_response(initial_input, agent_graph, config)
             
-        # Get final state & play back audio
-        thread_state = agent_graph.get_state(config=config)
-        last_message = thread_state.values.get("messages")[-1]
-        if isinstance(last_message, AIMessage):
-            await play_audio(last_message.content)
+            # Get latest state to find final response
+            state = agent_graph.get_state(config)
+            last_msg = state.values["messages"][-1]
+            
+            if isinstance(last_msg, AIMessage):
+                await play_audio(last_msg.content)
 
-        # Await human Input via Voice Utils
-        transcribed_text = await record_audio_until_stop()
-        if "exit" in transcribed_text.lower():
-            break
-        initial_input.messages.append(HumanMessage(content=transcribed_text))
+            # Record user voice
+            transcribed_text = await record_audio_until_stop()
+            
+            if not transcribed_text or transcribed_text.lower() in ["exit", "quit"]:
+                print("\nExiting...")
+                break
+                
+            # Add user message to state for next turn
+            initial_input = AgentState(
+                messages=[HumanMessage(content=transcribed_text)],
+                customer_id=customer_id
+            )
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    try:
+        asyncio.run(main())
+    except KeyboardInterrupt:
+        print("\nInterrupted by user.")
