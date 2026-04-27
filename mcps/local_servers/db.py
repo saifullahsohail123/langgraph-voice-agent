@@ -119,11 +119,13 @@ async def create_expense(
 
 @mcp.tool()
 async def list_expenses(customer_id: UUID) -> str:
-    """List the customer's expenses."""
+    """List the customer's expenses. Returns a JSON list of expense objects."""
     with SessionLocal() as session:
         expenses = session.query(DBExpense).filter(DBExpense.customer_id == customer_id).all()
-        expenses_list = [Expense.model_validate(e.__dict__).model_dump_json(indent=2) for e in expenses]
-    return f"✅ Expense listed: {len(expenses)} itemsfound."
+        # Convert to Pydantic models for clean serialization
+        results = [Expense.model_validate(e.__dict__).model_dump() for e in expenses]
+        import json
+        return json.dumps(results, indent=2, default=str)
 
 @mcp.tool()
 async def update_expense(
@@ -158,6 +160,14 @@ async def delete_expense(expense_id: UUID) -> str:
         session.delete(expense)
         session.commit()
     return f"✅ Expense deleted successfully."
+
+@mcp.tool()
+async def delete_all_expenses(customer_id: UUID) -> str:
+    """Delete ALL expenses for a customer. Use with caution!"""
+    with SessionLocal() as session:
+        session.query(DBExpense).filter(DBExpense.customer_id == customer_id).delete()
+        session.commit()
+    return "✅ All expenses deleted successfully."
 
 if __name__ == "__main__":
     mcp.run(transport="stdio")
