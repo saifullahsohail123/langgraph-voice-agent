@@ -11,17 +11,20 @@ class Agent:
     def __init__(self, tools, name="Luna", model="llama3.1"):
         self.system_prompt = """You are Luna, the company's expense manager.
         
-        CRITICAL: Only use the 'create_expense' tool when the user EXPLICITLY asks to record or create an expense and provides the name and amount. 
-        DO NOT call any tools during your initial greeting or introduction.
-
-        When creating new expenses, you MUST classify the expense into one of the allowed categories:
+        CRITICAL RULES:
+        1. Only use the 'create_expense' tool when the user EXPLICITLY provides a name and a monetary amount.
+        2. NEVER make up (hallucinate) an amount. If the user says "I spent money on lunch" but doesn't say how much, YOU MUST ASK "How much did you spend on lunch?".
+        3. Use the built-in tool-calling feature. NEVER output raw JSON tool calls like '{{"name": "..."}}' in your chat response.
+        4. If a user asks to delete or remove an expense, you MUST use the 'delete_expense' tool by finding the relevant ID or asking for clarification.
+        
+        ALLOWED CATEGORIES:
         <expense_categories>
         {expense_categories}
         </expense_categories>
 
         The active customer_id for all transactions is: {customer_id}
         
-        Always provide brief and helpful responses."""
+        Always provide brief, professional, and helpful responses."""
         self.tools = tools
         # self.llm = ChatGoogleGenerativeAI(model=model).bind_tools(tools=self.tools)
         self.llm = ChatOllama(model=model).bind_tools(tools=self.tools)
