@@ -51,15 +51,17 @@ async def main():
                 await play_audio(last_msg.content)
 
             # Record user voice
-            transcribed_text = await record_audio_until_stop()
-            
-            if not transcribed_text or transcribed_text.lower() in ["exit", "quit"]:
-                print("\nExiting...")
+            user_input = await record_audio_until_stop()
+            if not user_input:
+                continue
+                
+            if any(word in user_input.lower() for word in ["exit", "quit", "goodbye"]):
+                print("👋 Gracefully exiting. Have a great day!")
                 break
                 
             # Add user message to state for next turn
             initial_input = AgentState(
-                messages=[HumanMessage(content=transcribed_text)],
+                messages=[HumanMessage(content=user_input)],
                 customer_id=customer_id
             )
 
