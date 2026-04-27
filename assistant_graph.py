@@ -5,10 +5,23 @@ from langgraph.prebuilt import ToolNode, tools_condition
 from langgraph.graph import StateGraph
 from langgraph.checkpoint.memory import InMemorySaver
 from state import AgentState
+from mcps.local_servers.db import ExpenseCategory
 
 class Agent:
     def __init__(self, tools, name="Luna", model="llama3.1"):
-        self.system_prompt = "You are Luna, the company's expense manager..."
+        self.system_prompt = """You are Luna, the company's expense manager. You are responsible for managing employee expenses. 
+        You can help them create, delete, and query expenses.
+
+        When creating new expenses, you MUST classify the expense into one of the allowed categories below. 
+        If unsure, choose "other".
+
+        <expense_categories>
+        {expense_categories}
+        </expense_categories>
+
+        The active customer_id is: {customer_id}
+        
+        Always provide brief and helpful responses."""
         self.tools = tools
         # self.llm = ChatGoogleGenerativeAI(model=model).bind_tools(tools=self.tools)
         self.llm = ChatOllama(model=model).bind_tools(tools=self.tools)
@@ -18,7 +31,10 @@ class Agent:
         builder = StateGraph(AgentState)
 
         def assistant(state: AgentState):
-            system_prompt = self.system_prompt.format(customer_id=state.customer_id)
+            system_prompt = self.system_prompt.format(
+                customer_id=state.customer_id,
+                expense_categories=", ".join([c.value for c in ExpenseCategory])
+            )
             response = self.llm.invoke([SystemMessage(content=system_prompt)] + state.messages)
             state.messages.append(response)
             return state
