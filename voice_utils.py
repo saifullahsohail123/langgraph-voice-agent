@@ -12,9 +12,9 @@ try:
 except OSError:
     sd = None
 
-# Load Whisper model once
+# Load Whisper model once (using 'small' for better accuracy)
 print("Loading Whisper model...")
-stt_model = whisper.load_model("base")
+stt_model = whisper.load_model("small")
 
 async def record_audio_until_stop():
     """Records audio from the microphone until Enter is pressed and transcribes it."""
