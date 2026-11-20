@@ -1,0 +1,34 @@
+[
+  {
+    "id": "a7c77c41-0034-45de-bb33-21d0ec343864",
+    "name": "Food & Coffee",
+    "amount": 35.0,
+    "category": "meals",
+    "description": "Voice recorded: Add 35 dollars for lunch with client",
+    "created_at": "2026-11-20 21:55"
+  },
+  {
+    "id": "719fff12-3bde-49ea-b7ed-890cd1ee020d",
+    "name": "Team Lunch",
+    "amount": 42.5,
+    "category": "meals",
+    "description": "Lunch meeting with product design team",
+    "created_at": "2026-11-20 21:55"
+  },
+  {
+    "id": "c7419c53-a796-4ba8-bbed-2eee1a1bb409",
+    "name": "Uber to Airport",
+    "amount": 34.0,
+    "category": "travel",
+    "description": "Travel to regional tech summit",
+    "created_at": "2026-11-20 21:55"
+  },
+  {
+    "id": "9b76173f-af84-40b8-90d5-521c33b86ea5",
+    "name": "Cloud Server Subscription",
+    "amount": 89.99,
+    "category": "office_supplies",
+    "description": "Monthly compute hosting",
+    "created_at": "2026-11-20 21:55"
+  }
+]

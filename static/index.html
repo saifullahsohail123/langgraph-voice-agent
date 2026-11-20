@@ -7,14 +7,330 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/static/style.css" />
+  <base href="/VoiceAssistant/">
+  <link rel="stylesheet" href="/VoiceAssistant/style.css">
+  <style>
+
+:root {
+  --bg-dark: #07090e;
+  --bg-card: rgba(16, 20, 31, 0.75);
+  --bg-card-border: rgba(255, 255, 255, 0.08);
+  --bg-card-hover: rgba(25, 31, 48, 0.85);
+  --primary: #6366f1;
+  --primary-light: #818cf8;
+  --primary-glow: rgba(99, 102, 241, 0.35);
+  --accent-cyan: #06b6d4;
+  --accent-cyan-glow: rgba(6, 182, 212, 0.35);
+  --accent-purple: #a855f7;
+  --text-main: #f8fafc;
+  --text-muted: #94a3b8;
+  --text-dim: #64748b;
+  --success: #10b981;
+  --danger: #ef4444;
+  --warning: #f59e0b;
+  --font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+  --radius-lg: 20px;
+  --radius-md: 14px;
+  --radius-sm: 8px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  background-color: var(--bg-dark);
+  color: var(--text-main);
+  font-family: var(--font-sans);
+  line-height: 1.6;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow-x: hidden;
+}
+.ambient-glow {
+  position: absolute; border-radius: 50%;
+  filter: blur(120px); pointer-events: none; z-index: 0;
+}
+.glow-1 {
+  width: 500px; height: 500px;
+  background: radial-gradient(circle, rgba(99, 102, 241, 0.18), transparent 70%);
+  top: -100px; left: 10%;
+}
+.glow-2 {
+  width: 600px; height: 600px;
+  background: radial-gradient(circle, rgba(6, 182, 212, 0.14), transparent 70%);
+  bottom: 0px; right: 5%;
+}
+.top-nav {
+  position: relative; z-index: 10;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 1.2rem 4%; background: rgba(7, 9, 14, 0.8);
+  backdrop-filter: blur(16px); border-bottom: 1px solid var(--bg-card-border);
+}
+.brand { display: flex; align-items: center; gap: 12px; }
+.brand-badge {
+  display: flex; align-items: center; gap: 8px;
+  background: rgba(99, 102, 241, 0.12); border: 1px solid rgba(99, 102, 241, 0.3);
+  padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 700;
+  letter-spacing: 0.08em; color: var(--primary-light);
+}
+.pulse-dot {
+  width: 7px; height: 7px; background: var(--primary);
+  border-radius: 50%; box-shadow: 0 0 10px var(--primary);
+  animation: pulse-ring 2s infinite;
+}
+@keyframes pulse-ring {
+  0% { transform: scale(0.95); opacity: 0.7; }
+  50% { transform: scale(1.3); opacity: 1; }
+  100% { transform: scale(0.95); opacity: 0.7; }
+}
+.brand-title { font-size: 1.1rem; font-weight: 700; letter-spacing: -0.02em; color: var(--text-main); }
+.nav-right { display: flex; align-items: center; gap: 16px; }
+.nav-link { color: var(--text-muted); text-decoration: none; font-size: 0.9rem; font-weight: 500; transition: color 0.2s; }
+.nav-link:hover { color: var(--text-main); }
+.btn-github {
+  display: flex; align-items: center; gap: 8px;
+  background: rgba(255, 255, 255, 0.05); border: 1px solid var(--bg-card-border);
+  color: var(--text-main); padding: 6px 14px; border-radius: 8px;
+  text-decoration: none; font-size: 0.85rem; font-weight: 600; transition: all 0.2s;
+}
+.btn-github:hover { background: rgba(255, 255, 255, 0.1); border-color: rgba(255, 255, 255, 0.2); }
+
+.app-layout {
+  position: relative; z-index: 5; flex: 1;
+  display: grid; grid-template-columns: 1fr 1.15fr; gap: 28px;
+  max-width: 1400px; width: 100%; margin: 0 auto; padding: 32px 4%;
+}
+@media (max-width: 960px) { .app-layout { grid-template-columns: 1fr; } }
+
+.assistant-card {
+  background: var(--bg-card); backdrop-filter: blur(20px);
+  border: 1px solid var(--bg-card-border); border-radius: var(--radius-lg);
+  padding: 36px 30px; display: flex; flex-direction: column;
+  align-items: center; text-align: center; box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+}
+.assistant-status {
+  display: flex; align-items: center; gap: 8px;
+  background: rgba(0, 0, 0, 0.35); border: 1px solid var(--bg-card-border);
+  padding: 5px 14px; border-radius: 20px; font-size: 0.8rem;
+  color: var(--text-muted); margin-bottom: 24px;
+}
+.status-indicator {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--success); box-shadow: 0 0 8px var(--success);
+}
+.status-indicator.listening {
+  background: var(--accent-cyan); box-shadow: 0 0 12px var(--accent-cyan);
+  animation: pulse-ring 1s infinite;
+}
+.status-indicator.speaking {
+  background: var(--primary); box-shadow: 0 0 12px var(--primary);
+  animation: pulse-ring 0.8s infinite;
+}
+
+.orb-container {
+  position: relative; width: 160px; height: 160px;
+  margin: 10px auto 26px auto; display: flex;
+  align-items: center; justify-content: center;
+}
+.orb-ring { position: absolute; border-radius: 50%; border: 1px solid rgba(99, 102, 241, 0.2); transition: all 0.4s ease; }
+.ring-1 { width: 140px; height: 140px; }
+.ring-2 { width: 160px; height: 160px; border-color: rgba(6, 182, 212, 0.15); }
+.ring-3 { width: 180px; height: 180px; border-color: rgba(168, 85, 247, 0.1); }
+.core-orb {
+  position: relative; width: 100px; height: 100px; border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #818cf8, #4f46e5 60%, #312e81);
+  box-shadow: 0 0 35px var(--primary-glow); display: flex;
+  align-items: center; justify-content: center; color: #fff;
+  cursor: pointer; transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.core-orb:hover { transform: scale(1.06); box-shadow: 0 0 50px rgba(99, 102, 241, 0.6); }
+.core-orb.listening {
+  background: radial-gradient(circle at 35% 35%, #38bdf8, #0284c7 60%, #0369a1);
+  box-shadow: 0 0 55px var(--accent-cyan-glow); transform: scale(1.12);
+  animation: orb-breathe 1.8s infinite ease-in-out;
+}
+.core-orb.speaking {
+  background: radial-gradient(circle at 35% 35%, #c084fc, #9333ea 60%, #581c87);
+  box-shadow: 0 0 55px rgba(168, 85, 247, 0.5); animation: orb-speak 1.2s infinite ease-in-out;
+}
+@keyframes orb-breathe {
+  0% { transform: scale(1.08); box-shadow: 0 0 35px var(--accent-cyan-glow); }
+  50% { transform: scale(1.18); box-shadow: 0 0 65px var(--accent-cyan-glow); }
+  100% { transform: scale(1.08); box-shadow: 0 0 35px var(--accent-cyan-glow); }
+}
+@keyframes orb-speak {
+  0% { transform: scale(1.05); }
+  50% { transform: scale(1.15); }
+  100% { transform: scale(1.05); }
+}
+.mic-icon { width: 36px; height: 36px; max-width: 36px; max-height: 36px; }
+
+.voice-title { font-size: 1.85rem; font-weight: 800; letter-spacing: -0.03em; margin-bottom: 6px; }
+.voice-subtitle { font-size: 0.95rem; color: var(--text-muted); max-width: 380px; margin-bottom: 24px; }
+
+.controls-row {
+  display: flex; gap: 12px; width: 100%; max-width: 360px; margin-bottom: 22px;
+}
+.btn-voice {
+  flex: 1; display: flex; align-items: center; justify-content: center; gap: 10px;
+  background: linear-gradient(135deg, var(--primary), #4338ca);
+  color: white; border: none; border-radius: var(--radius-md);
+  padding: 14px 24px; font-size: 1rem; font-weight: 700;
+  cursor: pointer; box-shadow: 0 10px 25px var(--primary-glow); transition: all 0.25s;
+}
+.btn-voice:hover { transform: translateY(-2px); box-shadow: 0 14px 30px rgba(99, 102, 241, 0.5); }
+.btn-voice.active {
+  background: linear-gradient(135deg, var(--danger), #b91c1c);
+  box-shadow: 0 10px 25px rgba(239, 68, 68, 0.4);
+}
+.voice-btn-svg { width: 20px; height: 20px; flex-shrink: 0; }
+.btn-sound {
+  background: rgba(255, 255, 255, 0.05); border: 1px solid var(--bg-card-border);
+  color: var(--text-main); border-radius: var(--radius-md);
+  padding: 0 16px; display: flex; align-items: center; justify-content: center;
+  cursor: pointer; transition: all 0.2s;
+}
+.btn-sound:hover { background: rgba(255, 255, 255, 0.1); }
+.btn-sound svg { width: 20px; height: 20px; stroke: #c7d2fe; }
+
+.quick-prompts { width: 100%; margin-bottom: 22px; }
+.prompts-label {
+  display: block; font-size: 0.75rem; color: var(--text-dim);
+  text-transform: uppercase; font-weight: 700; letter-spacing: 0.06em; margin-bottom: 8px;
+}
+.prompt-chips { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
+.chip {
+  background: rgba(255, 255, 255, 0.04); border: 1px solid var(--bg-card-border);
+  color: var(--text-muted); font-size: 0.78rem; padding: 6px 12px;
+  border-radius: 16px; cursor: pointer; transition: all 0.2s;
+}
+.chip:hover {
+  background: rgba(99, 102, 241, 0.15); border-color: rgba(99, 102, 241, 0.3);
+  color: var(--primary-light);
+}
+
+.dialogue-box {
+  width: 100%; background: rgba(10, 14, 23, 0.8); border: 1px solid var(--bg-card-border);
+  border-radius: var(--radius-md); padding: 16px; text-align: left; margin-bottom: 18px;
+  min-height: 120px; display: flex; flex-direction: column; gap: 12px;
+}
+.dialogue-line { display: flex; gap: 8px; font-size: 0.88rem; line-height: 1.5; }
+.speaker-tag {
+  font-weight: 700; font-family: var(--font-mono); font-size: 0.8rem;
+  padding: 2px 6px; border-radius: 4px; height: fit-content;
+}
+.user-line .speaker-tag { color: var(--accent-cyan); background: rgba(6, 182, 212, 0.12); }
+.luna-line .speaker-tag { color: var(--primary-light); background: rgba(99, 102, 241, 0.12); }
+.dialogue-content { color: var(--text-main); flex: 1; }
+
+.text-input-form { display: flex; width: 100%; gap: 8px; }
+.text-input-form input {
+  flex: 1; background: rgba(255, 255, 255, 0.04); border: 1px solid var(--bg-card-border);
+  color: var(--text-main); border-radius: var(--radius-md); padding: 12px 16px; font-size: 0.9rem;
+  outline: none; transition: border-color 0.2s;
+}
+.text-input-form input:focus { border-color: var(--primary); }
+.btn-send {
+  background: var(--primary); border: none; color: white;
+  border-radius: var(--radius-md); width: 48px; display: flex;
+  align-items: center; justify-content: center; cursor: pointer; transition: background 0.2s;
+}
+.btn-send:hover { background: var(--primary-light); }
+
+.dashboard-panel { display: flex; flex-direction: column; gap: 20px; }
+.summary-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.summary-card {
+  background: var(--bg-card); backdrop-filter: blur(20px);
+  border: 1px solid var(--bg-card-border); border-radius: var(--radius-md);
+  padding: 20px; display: flex; flex-direction: column; gap: 6px;
+}
+.card-caption {
+  font-size: 0.78rem; text-transform: uppercase; color: var(--text-dim);
+  font-weight: 700; letter-spacing: 0.05em;
+}
+.card-metric {
+  font-size: 2rem; font-weight: 800; color: var(--text-main); letter-spacing: -0.02em;
+}
+.card-sub { font-size: 0.8rem; color: var(--text-muted); }
+
+/* Redesigned Architecture Card */
+.status-card { display: flex; flex-direction: column; justify-content: space-between; }
+.arch-card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 2px; }
+.live-pill {
+  display: inline-flex; align-items: center; gap: 5px;
+  font-size: 0.72rem; font-weight: 700; color: #34d399;
+  background: rgba(16, 185, 129, 0.12); border: 1px solid rgba(16, 185, 129, 0.3);
+  padding: 2px 8px; border-radius: 12px;
+}
+.live-dot {
+  width: 6px; height: 6px; background: #10b981; border-radius: 50%;
+  box-shadow: 0 0 8px #10b981; animation: pulse-ring 2s infinite;
+}
+.arch-title-wrap { display: flex; align-items: baseline; gap: 6px; margin: 4px 0 6px 0; }
+.arch-title-main { font-size: 1.35rem; font-weight: 800; letter-spacing: -0.02em; color: #ffffff; }
+.arch-plus { font-size: 1.1rem; color: #818cf8; font-weight: 700; }
+.arch-title-mcp {
+  font-size: 1.35rem; font-weight: 800; letter-spacing: -0.02em;
+  background: linear-gradient(135deg, var(--accent-cyan), #38bdf8);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+}
+.arch-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.arch-chip {
+  font-size: 0.7rem; font-family: var(--font-mono); color: #cbd5e1;
+  background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 2px 7px; border-radius: 4px;
+}
+
+.table-card {
+  background: var(--bg-card); backdrop-filter: blur(20px);
+  border: 1px solid var(--bg-card-border); border-radius: var(--radius-lg);
+  padding: 24px; flex: 1; display: flex; flex-direction: column;
+}
+.table-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; }
+.table-header h2 { font-size: 1.2rem; font-weight: 700; }
+.btn-refresh {
+  background: rgba(255, 255, 255, 0.05); border: 1px solid var(--bg-card-border);
+  color: var(--text-muted); border-radius: 8px; padding: 6px; cursor: pointer;
+  display: flex; align-items: center; justify-content: center; transition: all 0.2s;
+}
+.btn-refresh:hover { color: var(--text-main); background: rgba(255, 255, 255, 0.1); }
+.expenses-table-wrapper { overflow-x: auto; flex: 1; }
+.expenses-table { width: 100%; border-collapse: collapse; text-align: left; font-size: 0.88rem; }
+.expenses-table th {
+  color: var(--text-dim); font-weight: 600; font-size: 0.75rem; text-transform: uppercase;
+  letter-spacing: 0.05em; padding: 10px 14px; border-bottom: 1px solid var(--bg-card-border);
+}
+.expenses-table td { padding: 14px; border-bottom: 1px solid rgba(255, 255, 255, 0.04); vertical-align: middle; }
+.category-tag {
+  display: inline-block; padding: 3px 10px; border-radius: 12px;
+  font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em;
+}
+.cat-meals { background: rgba(245, 158, 11, 0.15); color: #fbbf24; }
+.cat-travel { background: rgba(6, 182, 212, 0.15); color: #38bdf8; }
+.cat-lodging { background: rgba(168, 85, 247, 0.15); color: #c084fc; }
+.cat-entertainment { background: rgba(236, 72, 153, 0.15); color: #f472b6; }
+.cat-training { background: rgba(59, 130, 246, 0.15); color: #60a5fa; }
+.cat-education { background: rgba(20, 184, 166, 0.15); color: #2dd4bf; }
+.cat-office_supplies { background: rgba(16, 185, 129, 0.15); color: #34d399; }
+.cat-gifts { background: rgba(244, 63, 94, 0.15); color: #fb7185; }
+.cat-other { background: rgba(148, 163, 184, 0.15); color: #cbd5e1; }
+.expense-amount { font-family: var(--font-mono); font-weight: 700; color: var(--text-main); }
+.btn-del { background: transparent; border: none; color: var(--text-dim); cursor: pointer; padding: 4px; transition: color 0.2s; }
+.btn-del:hover { color: var(--danger); }
+.app-footer {
+  text-align: center; padding: 20px; font-size: 0.8rem;
+  color: var(--text-dim); border-top: 1px solid var(--bg-card-border);
+  background: rgba(7, 9, 14, 0.8); position: relative; z-index: 5;
+}
+.app-footer a { color: var(--primary-light); text-decoration: none; }
+.app-footer a:hover { text-decoration: underline; }
+
+  </style>
 </head>
 <body>
-  <!-- Ambient background glow elements -->
   <div class="ambient-glow glow-1"></div>
   <div class="ambient-glow glow-2"></div>
 
-  <!-- Top Navigation Header -->
   <header class="top-nav">
     <div class="brand">
       <div class="brand-badge">
@@ -32,9 +348,7 @@
     </div>
   </header>
 
-  <!-- Main Container -->
   <main class="app-layout">
-    <!-- Left Column: Voice Assistant Center -->
     <section class="voice-center">
       <div class="assistant-card">
         <div class="assistant-status">
@@ -42,13 +356,12 @@
           <span class="status-text" id="statusText">Ready for Voice Input</span>
         </div>
 
-        <!-- Luna Voice Orb / Reactive Visualizer -->
         <div class="orb-container" id="orbContainer">
           <div class="orb-ring ring-3"></div>
           <div class="orb-ring ring-2"></div>
           <div class="orb-ring ring-1"></div>
-          <div class="core-orb" id="coreOrb">
-            <svg class="mic-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <div class="core-orb" id="coreOrb" title="Click to speak with Luna">
+            <svg class="mic-icon" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/>
               <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
               <line x1="12" y1="19" x2="12" y2="23"/>
@@ -60,29 +373,37 @@
         <h1 class="voice-title">Talk to Luna</h1>
         <p class="voice-subtitle">Press to talk or ask about your spending, budget, or new expenses.</p>
 
-        <!-- Main Voice Interaction Button -->
         <div class="controls-row">
           <button class="btn-voice" id="btnVoice">
-            <span class="voice-btn-icon">🎙️</span>
+            <svg class="voice-btn-svg" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/>
+              <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+              <line x1="12" y1="19" x2="12" y2="23"/>
+              <line x1="8" y1="23" x2="16" y2="23"/>
+            </svg>
             <span id="btnVoiceLabel">Click to Speak</span>
           </button>
           <button class="btn-sound" id="btnMuteTTS" title="Toggle Voice Output">
-            <span id="muteIcon">🔊</span>
+            <span id="muteIcon">
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+                <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+              </svg>
+            </span>
           </button>
         </div>
 
-        <!-- Quick Prompts -->
         <div class="quick-prompts">
-          <span class="prompts-label">Try saying:</span>
+          <span class="prompts-label">Try saying or typing:</span>
           <div class="prompt-chips">
-            <button class="chip" data-query="Add $25 for client lunch">"Add $25 for lunch"</button>
-            <button class="chip" data-query="Add $45 for Uber to airport">"Add $45 for Uber"</button>
-            <button class="chip" data-query="How much have I spent so far?">"What is my total?"</button>
-            <button class="chip" data-query="List my recorded expenses">"List my expenses"</button>
+            <button class="chip" data-query="log and expense of $20">"log an expense of $20"</button>
+            <button class="chip" data-query="add $45 for lunch">"Add $45 for lunch"</button>
+            <button class="chip" data-query="spent $34 on uber">"Spent $34 on Uber"</button>
+            <button class="chip" data-query="What is my total spending?">"What is my total?"</button>
+            <button class="chip" data-query="List all my expenses">"List my expenses"</button>
           </div>
         </div>
 
-        <!-- Live Transcription & Response Box -->
         <div class="dialogue-box">
           <div class="dialogue-line user-line" id="userDialogue">
             <span class="speaker-tag">You:</span>
@@ -94,19 +415,16 @@
           </div>
         </div>
 
-        <!-- Text Input Alternative -->
         <form class="text-input-form" id="textInputForm">
-          <input type="text" id="textInput" placeholder="Type a command or expense (e.g. 'Add $12 for coffee')..." autocomplete="off" />
-          <button type="submit" class="btn-send">
+          <input type="text" id="textInput" placeholder="Type a command (e.g. 'log an expense of $20' or 'total')..." autocomplete="off" />
+          <button type="submit" class="btn-send" aria-label="Send command">
             <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
           </button>
         </form>
       </div>
     </section>
 
-    <!-- Right Column: Live Expense Management Dashboard -->
     <section class="dashboard-panel">
-      <!-- Total Card -->
       <div class="summary-cards">
         <div class="summary-card">
           <span class="card-caption">Total Recorded Spending</span>
@@ -114,13 +432,23 @@
           <span class="card-sub" id="expenseCount">0 transactions recorded</span>
         </div>
         <div class="summary-card status-card">
-          <span class="card-caption">Agent Architecture</span>
-          <div class="card-metric arch-tag">LangGraph + MCP</div>
-          <span class="card-sub">Real-Time State Machine</span>
+          <div class="arch-card-header">
+            <span class="card-caption">Agent Architecture</span>
+            <span class="live-pill"><span class="live-dot"></span>Active</span>
+          </div>
+          <div class="arch-title-wrap">
+            <span class="arch-title-main">LangGraph</span>
+            <span class="arch-plus">+</span>
+            <span class="arch-title-mcp">FastMCP</span>
+          </div>
+          <div class="arch-chips">
+            <span class="arch-chip">StateGraph</span>
+            <span class="arch-chip">ToolNode</span>
+            <span class="arch-chip">MemorySaver</span>
+          </div>
         </div>
       </div>
 
-      <!-- Expense List -->
       <div class="table-card">
         <div class="table-header">
           <h2>Recorded Expenses</h2>
@@ -140,9 +468,7 @@
                 <th>Action</th>
               </tr>
             </thead>
-            <tbody id="expensesTbody">
-              <!-- Dynamically populated -->
-            </tbody>
+            <tbody id="expensesTbody"></tbody>
           </table>
         </div>
       </div>
@@ -150,9 +476,389 @@
   </main>
 
   <footer class="app-footer">
-    <p>Powered by <strong>LangGraph</strong>, <strong>FastAPI</strong> & <strong>Model Context Protocol (MCP)</strong> · Designed by <a href="https://vortexlogiclabs.com/portfolio" target="_blank">Saif Ullah</a> at Vortex Logic Labs</p>
+    <p>Powered by <strong>LangGraph</strong>, <strong>FastAPI</strong> &amp; <strong>Model Context Protocol (MCP)</strong> · Designed by <a href="https://vortexlogiclabs.com/portfolio" target="_blank">Saif Ullah</a> at Vortex Logic Labs</p>
   </footer>
 
-  <script src="/static/app.js"></script>
+  <script src="/VoiceAssistant/app.js"></script>
+  <script>
+
+document.addEventListener('DOMContentLoaded', () => {
+  const statusIndicator = document.getElementById('statusIndicator');
+  const statusText = document.getElementById('statusText');
+  const coreOrb = document.getElementById('coreOrb');
+  const btnVoice = document.getElementById('btnVoice');
+  const btnVoiceLabel = document.getElementById('btnVoiceLabel');
+  const btnMuteTTS = document.getElementById('btnMuteTTS');
+  const muteIcon = document.getElementById('muteIcon');
+  const userTranscript = document.getElementById('userTranscript');
+  const lunaTranscript = document.getElementById('lunaTranscript');
+  const textInputForm = document.getElementById('textInputForm');
+  const textInput = document.getElementById('textInput');
+  const totalAmount = document.getElementById('totalAmount');
+  const expenseCount = document.getElementById('expenseCount');
+  const expensesTbody = document.getElementById('expensesTbody');
+  const btnRefresh = document.getElementById('btnRefresh');
+  const promptChips = document.querySelectorAll('.chip');
+
+  let isListening = false;
+  let isTTSMuted = false;
+  let recognition = null;
+  let synth = window.speechSynthesis || null;
+
+  const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition || null;
+  if (SpeechRec) {
+    recognition = new SpeechRec();
+    recognition.continuous = false;
+    recognition.interimResults = true;
+    recognition.lang = 'en-US';
+
+    recognition.onstart = () => {
+      isListening = true;
+      setOrbState('listening');
+      statusText.textContent = 'Listening to your voice...';
+      btnVoice.classList.add('active');
+      btnVoiceLabel.textContent = 'Stop Listening';
+    };
+
+    recognition.onresult = (event) => {
+      let interim = '';
+      let final = '';
+      for (let i = event.resultIndex; i < event.results.length; ++i) {
+        if (event.results[i].isFinal) final += event.results[i][0].transcript;
+        else interim += event.results[i][0].transcript;
+      }
+      if (final) {
+        userTranscript.textContent = final;
+        handleUserQuery(final);
+      } else if (interim) {
+        userTranscript.textContent = interim + '...';
+      }
+    };
+
+    recognition.onerror = () => {
+      resetVoiceState();
+      statusText.textContent = 'Microphone ready (click to speak)';
+    };
+
+    recognition.onend = () => {
+      resetVoiceState();
+    };
+  } else {
+    btnVoiceLabel.textContent = 'Click to Speak';
+  }
+
+  function resetVoiceState() {
+    isListening = false;
+    btnVoice.classList.remove('active');
+    btnVoiceLabel.textContent = 'Click to Speak';
+    setOrbState('idle');
+  }
+
+  function setOrbState(state) {
+    coreOrb.classList.remove('listening', 'speaking');
+    statusIndicator.classList.remove('listening', 'speaking');
+    if (state === 'listening') {
+      coreOrb.classList.add('listening');
+      statusIndicator.classList.add('listening');
+    } else if (state === 'speaking') {
+      coreOrb.classList.add('speaking');
+      statusIndicator.classList.add('speaking');
+    }
+  }
+
+  function speakResponse(text) {
+    if (!synth || isTTSMuted) return;
+    synth.cancel();
+    const cleanText = text.replace(/[*_#`$]/g, '');
+    const utterance = new SpeechSynthesisUtterance(cleanText);
+    utterance.rate = 1.05;
+    const voices = synth.getVoices();
+    const preferred = voices.find(v => (v.name.includes('Natural') || v.name.includes('Google') || v.name.includes('Samantha') || v.name.includes('Ava') || v.name.includes('Zira')) && v.lang.startsWith('en'));
+    if (preferred) utterance.voice = preferred;
+
+    utterance.onstart = () => {
+      setOrbState('speaking');
+      statusText.textContent = 'Luna is speaking...';
+    };
+    utterance.onend = () => {
+      setOrbState('idle');
+      statusText.textContent = 'Ready for Voice Input';
+    };
+    utterance.onerror = () => {
+      setOrbState('idle');
+      statusText.textContent = 'Ready for Voice Input';
+    };
+    synth.speak(utterance);
+  }
+
+  async function handleUserQuery(query) {
+    if (!query || !query.trim()) return;
+    setOrbState('listening');
+    statusText.textContent = 'Processing request...';
+    userTranscript.textContent = query;
+
+    try {
+      const response = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: query })
+      });
+      if (response.ok) {
+        const data = await response.json();
+        lunaTranscript.textContent = data.reply;
+        speakResponse(data.reply);
+        if (data.expenses) {
+          renderExpenses(data.expenses, data.total);
+        } else {
+          loadExpenses();
+        }
+        return;
+      }
+    } catch (err) {}
+
+    processClientLunaTurn(query);
+  }
+
+  function processClientLunaTurn(query) {
+    const raw = query.toLowerCase().trim();
+    let expenses = getStoredExpenses();
+    let reply = '';
+
+    // Total / Balance query
+    if (/(total|balance|how much|sum|spending)/i.test(raw)) {
+      const sum = expenses.reduce((a, b) => a + Number(b.amount || 0), 0);
+      reply = `You have recorded ${expenses.length} expense${expenses.length === 1 ? '' : 's'} totaling $${sum.toFixed(2)}.`;
+    }
+    // Clear / Reset query
+    else if (/(clear all|delete all|reset|remove all)/i.test(raw)) {
+      expenses = [];
+      saveStoredExpenses(expenses);
+      reply = 'All recorded expenses have been cleared.';
+      renderExpenses(expenses);
+    }
+    // List expenses query
+    else if (/(list|show|what are my expenses|all expenses|transactions|history)/i.test(raw)) {
+      if (expenses.length === 0) {
+        reply = 'You have no recorded expenses.';
+      } else {
+        const top = expenses.slice(0, 3).map(e => `${e.name} ($${Number(e.amount).toFixed(2)})`).join(', ');
+        const sum = expenses.reduce((a, b) => a + Number(b.amount || 0), 0);
+        reply = `Here are your recent expenses: ${top}. Your overall total is $${sum.toFixed(2)}.`;
+      }
+    }
+    // Record / Log Expense (matches: "log and expense of $20", "log an expense of $20", "add $45 for lunch", "$20 for coffee", "spent 30 dollars on gas", etc.)
+    else if (
+      /(log|add|spent|spend|bought|buy|record|charge|charged|paid|pay|purchase|new expense)/i.test(raw) ||
+      /expense\s+of/i.test(raw) ||
+      /expense/i.test(raw) ||
+      /\$\s*\d+/.test(raw) ||
+      /\d+\s*(\$|dollars?|bucks?)/i.test(raw)
+    ) {
+      let amount = 20.0;
+      const mDollar = raw.match(/\$\s*(\d+(?:\.\d{1,2})?)/);
+      const mAfter = raw.match(/(\d+(?:\.\d{1,2})?)\s*(?:\$|dollars?|bucks?)/i);
+      const mAnyNum = raw.match(/(\d+(?:\.\d{1,2})?)/);
+
+      if (mDollar && mDollar[1]) amount = parseFloat(mDollar[1]);
+      else if (mAfter && mAfter[1]) amount = parseFloat(mAfter[1]);
+      else if (mAnyNum && mAnyNum[1]) amount = parseFloat(mAnyNum[1]);
+
+      let category = 'other';
+      let name = 'Expense';
+
+      if (/(lunch|dinner|breakfast|food|coffee|starbucks|cafe|drinks?|beer|wine|burger|pizza|groceries|snack|restaurant|meal|meals)/i.test(raw)) {
+        category = 'meals';
+        if (/coffee|starbucks|cafe/i.test(raw)) name = 'Coffee & Cafe';
+        else if (/lunch/i.test(raw)) name = 'Lunch';
+        else if (/dinner/i.test(raw)) name = 'Dinner';
+        else if (/breakfast/i.test(raw)) name = 'Breakfast';
+        else name = 'Meals & Food';
+      } else if (/(uber|taxi|cab|flight|tickets?|train|subway|metro|gas|fuel|parking|commute|transit|travel)/i.test(raw)) {
+        category = 'travel';
+        if (/uber/i.test(raw)) name = 'Uber';
+        else if (/flight|airline/i.test(raw)) name = 'Flight Ticket';
+        else if (/taxi|cab/i.test(raw)) name = 'Taxi Fare';
+        else if (/gas|fuel/i.test(raw)) name = 'Fuel';
+        else name = 'Travel & Transit';
+      } else if (/(hotel|airbnb|stay|room|motel|lodging|resort)/i.test(raw)) {
+        category = 'lodging';
+        name = 'Hotel Stay';
+      } else if (/(movie|cinema|concert|game|gaming|spotify|netflix|entertainment)/i.test(raw)) {
+        category = 'entertainment';
+        name = 'Entertainment';
+      } else if (/(course|training|workshop|seminar|bootcamp|certification)/i.test(raw)) {
+        category = 'training';
+        name = 'Professional Training';
+      } else if (/(book|books|tuition|study|education|class)/i.test(raw)) {
+        category = 'education';
+        name = 'Books & Study';
+      } else if (/(office|supplies|server|cloud|aws|hosting|monitor|laptop|computer|software|subscription|desk|paper)/i.test(raw)) {
+        category = 'office_supplies';
+        name = 'Office & Cloud';
+      } else if (/(gift|present|flowers)/i.test(raw)) {
+        category = 'gifts';
+        name = 'Gift';
+      } else {
+        const forMatch = raw.match(/(?:for|on)\s+([a-zA-Z\s]{2,20})/i);
+        if (forMatch && forMatch[1] && !/(an|and|the|a)/i.test(forMatch[1].trim())) {
+          name = forMatch[1].trim().replace(/\w/g, l => l.toUpperCase());
+        } else {
+          name = 'Expense';
+        }
+      }
+
+      const newExpense = {
+        id: Date.now().toString(),
+        name: name,
+        amount: amount,
+        category: category,
+        created_at: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+      };
+
+      expenses.unshift(newExpense);
+      saveStoredExpenses(expenses);
+      reply = `I've recorded that for you: ${name} for $${amount.toFixed(2)} under ${category}.`;
+      renderExpenses(expenses);
+    } else {
+      reply = `Hello! I'm Luna. I heard "${query}". You can ask me to log purchases (e.g. "Add $20 for lunch"), check your budget, or list your expenses!`;
+    }
+
+    lunaTranscript.textContent = reply;
+    speakResponse(reply);
+  }
+
+  function getStoredExpenses() {
+    const data = localStorage.getItem('luna_expenses');
+    if (!data) {
+      const defaults = [
+        { id: '1', name: 'Team Lunch', amount: 42.50, category: 'meals', created_at: 'Nov 20, 2026' },
+        { id: '2', name: 'Uber to Airport', amount: 34.00, category: 'travel', created_at: 'Nov 19, 2026' },
+        { id: '3', name: 'Cloud Infrastructure', amount: 89.99, category: 'office_supplies', created_at: 'Nov 18, 2026' }
+      ];
+      localStorage.setItem('luna_expenses', JSON.stringify(defaults));
+      return defaults;
+    }
+    try {
+      const parsed = JSON.parse(data);
+      if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      const defaults = [
+        { id: '1', name: 'Team Lunch', amount: 42.50, category: 'meals', created_at: 'Nov 20, 2026' },
+        { id: '2', name: 'Uber to Airport', amount: 34.00, category: 'travel', created_at: 'Nov 19, 2026' },
+        { id: '3', name: 'Cloud Infrastructure', amount: 89.99, category: 'office_supplies', created_at: 'Nov 18, 2026' }
+      ];
+      localStorage.setItem('luna_expenses', JSON.stringify(defaults));
+      return defaults;
+    } catch { return []; }
+  }
+
+  function saveStoredExpenses(list) {
+    localStorage.setItem('luna_expenses', JSON.stringify(list));
+  }
+
+  function renderExpenses(list, totalValue) {
+    if (!list) list = [];
+    const total = totalValue !== undefined ? totalValue : list.reduce((a, b) => a + Number(b.amount || 0), 0);
+    totalAmount.textContent = `$${total.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    expenseCount.textContent = `${list.length} transaction${list.length === 1 ? '' : 's'} recorded`;
+
+    expensesTbody.innerHTML = '';
+    if (list.length === 0) {
+      expensesTbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding: 24px; color: var(--text-dim);">No recorded expenses. Speak to Luna or type above to add one!</td></tr>';
+      return;
+    }
+
+    list.forEach(item => {
+      const tr = document.createElement('tr');
+      const catClass = `cat-${item.category || 'other'}`;
+      tr.innerHTML = `
+        <td><strong>${item.name || 'Expense'}</strong></td>
+        <td><span class="category-tag ${catClass}">${item.category || 'other'}</span></td>
+        <td class="expense-amount">$${Number(item.amount).toFixed(2)}</td>
+        <td style="color: var(--text-dim); font-size: 0.8rem;">${item.created_at || 'Today'}</td>
+        <td>
+          <button class="btn-del" data-id="${item.id}" title="Delete expense">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+          </button>
+        </td>
+      `;
+      expensesTbody.appendChild(tr);
+    });
+
+    document.querySelectorAll('.btn-del').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const id = btn.getAttribute('data-id');
+        deleteExpense(id);
+      });
+    });
+  }
+
+  function deleteExpense(id) {
+    let list = getStoredExpenses();
+    list = list.filter(x => x.id !== id);
+    saveStoredExpenses(list);
+    renderExpenses(list);
+  }
+
+  async function loadExpenses() {
+    try {
+      const res = await fetch('/api/expenses');
+      if (res.ok) {
+        const data = await res.json();
+        renderExpenses(data.expenses, data.total);
+        return;
+      }
+    } catch {}
+    renderExpenses(getStoredExpenses());
+  }
+
+  btnVoice.addEventListener('click', () => {
+    if (!recognition) return;
+    if (isListening) {
+      recognition.stop();
+    } else {
+      try { recognition.start(); } catch {}
+    }
+  });
+
+  coreOrb.addEventListener('click', () => {
+    btnVoice.click();
+  });
+
+  btnMuteTTS.addEventListener('click', () => {
+    isTTSMuted = !isTTSMuted;
+    if (isTTSMuted) {
+      muteIcon.innerHTML = '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><line x1="23" y1="9" x2="17" y2="15"></line><line x1="17" y1="9" x2="23" y2="15"></line></svg>';
+      btnMuteTTS.title = 'Unmute Luna Voice';
+      if (synth) synth.cancel();
+    } else {
+      muteIcon.innerHTML = '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>';
+      btnMuteTTS.title = 'Mute Luna Voice';
+    }
+  });
+
+  textInputForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const query = textInput.value.trim();
+    if (query) {
+      handleUserQuery(query);
+      textInput.value = '';
+    }
+  });
+
+  btnRefresh.addEventListener('click', () => {
+    loadExpenses();
+  });
+
+  promptChips.forEach(chip => {
+    chip.addEventListener('click', () => {
+      const q = chip.getAttribute('data-query');
+      handleUserQuery(q);
+    });
+  });
+
+  loadExpenses();
+});
+
+  </script>
 </body>
 </html>
