@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Luna · AI Voice Expense Agent | Vortex Logic Labs</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+  <!-- Ambient background glow elements -->
+  <div class="ambient-glow glow-1"></div>
+  <div class="ambient-glow glow-2"></div>
+
+  <!-- Top Navigation Header -->
+  <header class="top-nav">
+    <div class="brand">
+      <div class="brand-badge">
+        <span class="pulse-dot"></span>
+        <span>LUNA AI</span>
+      </div>
+      <span class="brand-title">Voice Expense Agent</span>
+    </div>
+    <div class="nav-right">
+      <a href="https://vortexlogiclabs.com/portfolio" class="nav-link" target="_blank">Portfolio</a>
+      <a href="https://github.com/saifullahsohail123/langgraph-voice-agent" class="btn-github" target="_blank">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M12 2C6.477 2 2 6.477 2 12c0 4.42 2.865 8.166 6.839 9.489.5.092.682-.217.682-.482 0-.237-.008-.866-.013-1.7-2.782.603-3.369-1.34-3.369-1.34-.454-1.156-1.11-1.462-1.11-1.462-.908-.62.069-.608.069-.608 1.003.07 1.531 1.03 1.531 1.03.892 1.529 2.341 1.087 2.91.831.092-.646.35-1.086.636-1.336-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.029-2.683-.103-.253-.446-1.27.098-2.647 0 0 .84-.269 2.75 1.025A9.578 9.578 0 0112 6.836c.85.004 1.705.114 2.504.336 1.909-1.294 2.747-1.025 2.747-1.025.546 1.377.203 2.394.1 2.647.64.699 1.028 1.592 1.028 2.683 0 3.842-2.339 4.687-4.566 4.935.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.743 0 .267.18.578.688.48C19.138 20.163 22 16.418 22 12c0-5.523-4.477-10-10-10z"/></svg>
+        <span>GitHub</span>
+      </a>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="app-layout">
+    <!-- Left Column: Voice Assistant Center -->
+    <section class="voice-center">
+      <div class="assistant-card">
+        <div class="assistant-status">
+          <span class="status-indicator" id="statusIndicator"></span>
+          <span class="status-text" id="statusText">Ready for Voice Input</span>
+        </div>
+
+        <!-- Luna Voice Orb / Reactive Visualizer -->
+        <div class="orb-container" id="orbContainer">
+          <div class="orb-ring ring-3"></div>
+          <div class="orb-ring ring-2"></div>
+          <div class="orb-ring ring-1"></div>
+          <div class="core-orb" id="coreOrb">
+            <svg class="mic-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/>
+              <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+              <line x1="12" y1="19" x2="12" y2="23"/>
+              <line x1="8" y1="23" x2="16" y2="23"/>
+            </svg>
+          </div>
+        </div>
+
+        <h1 class="voice-title">Talk to Luna</h1>
+        <p class="voice-subtitle">Press to talk or ask about your spending, budget, or new expenses.</p>
+
+        <!-- Main Voice Interaction Button -->
+        <div class="controls-row">
+          <button class="btn-voice" id="btnVoice">
+            <span class="voice-btn-icon">🎙️</span>
+            <span id="btnVoiceLabel">Click to Speak</span>
+          </button>
+          <button class="btn-sound" id="btnMuteTTS" title="Toggle Voice Output">
+            <span id="muteIcon">🔊</span>
+          </button>
+        </div>
+
+        <!-- Quick Prompts -->
+        <div class="quick-prompts">
+          <span class="prompts-label">Try saying:</span>
+          <div class="prompt-chips">
+            <button class="chip" data-query="Add $25 for client lunch">"Add $25 for lunch"</button>
+            <button class="chip" data-query="Add $45 for Uber to airport">"Add $45 for Uber"</button>
+            <button class="chip" data-query="How much have I spent so far?">"What is my total?"</button>
+            <button class="chip" data-query="List my recorded expenses">"List my expenses"</button>
+          </div>
+        </div>
+
+        <!-- Live Transcription & Response Box -->
+        <div class="dialogue-box">
+          <div class="dialogue-line user-line" id="userDialogue">
+            <span class="speaker-tag">You:</span>
+            <span class="dialogue-content" id="userTranscript">Press 'Click to Speak' or type below to begin.</span>
+          </div>
+          <div class="dialogue-line luna-line" id="lunaDialogue">
+            <span class="speaker-tag">Luna:</span>
+            <span class="dialogue-content" id="lunaTranscript">Hello! I'm Luna. I can help manage, categorize, and track your daily expenses seamlessly with voice.</span>
+          </div>
+        </div>
+
+        <!-- Text Input Alternative -->
+        <form class="text-input-form" id="textInputForm">
+          <input type="text" id="textInput" placeholder="Type a command or expense (e.g. 'Add $12 for coffee')..." autocomplete="off" />
+          <button type="submit" class="btn-send">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+          </button>
+        </form>
+      </div>
+    </section>
+
+    <!-- Right Column: Live Expense Management Dashboard -->
+    <section class="dashboard-panel">
+      <!-- Total Card -->
+      <div class="summary-cards">
+        <div class="summary-card">
+          <span class="card-caption">Total Recorded Spending</span>
+          <div class="card-metric" id="totalAmount">$0.00</div>
+          <span class="card-sub" id="expenseCount">0 transactions recorded</span>
+        </div>
+        <div class="summary-card status-card">
+          <span class="card-caption">Agent Architecture</span>
+          <div class="card-metric arch-tag">LangGraph + MCP</div>
+          <span class="card-sub">Real-Time State Machine</span>
+        </div>
+      </div>
+
+      <!-- Expense List -->
+      <div class="table-card">
+        <div class="table-header">
+          <h2>Recorded Expenses</h2>
+          <button class="btn-refresh" id="btnRefresh" title="Refresh data">
+            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
+          </button>
+        </div>
+        
+        <div class="expenses-table-wrapper">
+          <table class="expenses-table">
+            <thead>
+              <tr>
+                <th>Expense</th>
+                <th>Category</th>
+                <th>Amount</th>
+                <th>Date</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="expensesTbody">
+              <!-- Dynamically populated -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="app-footer">
+    <p>Powered by <strong>LangGraph</strong>, <strong>FastAPI</strong> & <strong>Model Context Protocol (MCP)</strong> · Designed by <a href="https://vortexlogiclabs.com/portfolio" target="_blank">Saif Ullah</a> at Vortex Logic Labs</p>
+  </footer>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>
